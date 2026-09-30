@@ -1,0 +1,10 @@
+# macOS
+.DS_Store
+
+# 编辑器 / 临时文件
+*.swp
+*~
+*.bak
+
+# 脚本运行时产生的备份（不入库）
+OfficeThinner-*-backup/
