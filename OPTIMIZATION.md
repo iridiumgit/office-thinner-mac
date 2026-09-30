@@ -64,8 +64,8 @@
 
 ## 四、看着很香但**不能做**的优化（会破坏代码签名）
 
-> ⚠️ 本节写于「SIP 与签名强制仍开启」的前提。用户在 2026-09-30 关闭了 SIP 与签名验证后，
-> 这两项**已经执行完毕**，见第八节。保留本节是因为在正常系统上它们依然不可用。
+> ⚠️ 本节描述的是**签名强制开启**（macOS 默认配置）时的情形。这两项在签名强制关闭的环境下
+> 已实测跑通，见第八节。保留本节是因为在未关闭签名强制的系统上它们依然不可用。
 
 现代 Office 带 **Sealed Resources v2 + hardened runtime**，`CodeResources` 用哈希封装了
 **29,962 个资源**。任何内容变更——删除、裁剪、改写——都会让签名失效，
@@ -135,15 +135,15 @@ sudo bash OfficeThinner.sh --apply --yes --min-size-kb 0
 ---
 
 ## 八、已执行：语言包裁剪 + 架构裁剪（需要 SIP/签名强制关闭）
-**执行日期**：2026-09-30　**环境**：macOS 27.2 / arm64，SIP 已关闭，签名强制已关闭
+**执行日期**：2026-09-30　**环境**：macOS / arm64　**前提**：SIP 与签名强制均已关闭
 
 ### 前置事实（实测）
 
-| 检查 | 结果 |
-|---|---|
-| `csrutil status` | `System Integrity Protection status: disabled.` |
-| 改动签名后能否启动 | ✅ 能（用改过的主二进制实测） |
-| 保留架构 | `arm64`（`uname -m`） |
+| 检查 | 要求 | 本环境实测值 |
+|---|---|---|
+| `csrutil status` | 需为 `disabled` | `System Integrity Protection status: disabled.` |
+| 改动主二进制后能否启动 | 需能启动 | ✅ 能（用改过的主二进制实测） |
+| 保留架构 | 按本机 | `arm64`（`uname -m`） |
 
 **一个反直觉的发现**：单独 `lipo -thin` 之后 `codesign --verify --strict` **仍然是通过的**。
 因为签名覆盖的是各切片自身的字节，`lipo -thin` 只是把目标切片原样取出，切片内字节不变。
@@ -158,7 +158,7 @@ sudo bash OfficeThinner.sh --apply --yes --min-size-kb 0
 | 通用二进制 | 裁剪 **228** 个（按 inode 去掉跨 App 重复），实测释放 **671.5 MB**，残留 **0** |
 | Office 总占用 | **4.19 GB → 2.81 GB**（du / inode 口径，−1.38 GB） |
 | 可回滚 | 语言包归档 `~/OfficeThinner-lproj-backup/20260930-122032/lproj-backup.tar.gz`（234 MB，90,758 条目，打包后校验通过才删除） |
-| 签名状态 | 三个 App 均报 `a sealed resource is missing or invalid`（预期，用户已关闭校验） |
+| 签名状态 | 三个 App 均报 `a sealed resource is missing or invalid`（预期：签名强制关闭时的必然结果） |
 | 功能验证 | 三个 App 正常启动、无崩溃；字体 CoreText 加载排版 **840/840** 通过；跨 App 硬链接（`links=3`）保住 |
 
 ### 新增工具

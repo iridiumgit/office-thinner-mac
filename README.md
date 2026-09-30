@@ -2,9 +2,13 @@
 
 为 **Microsoft Office for Mac** 回收被重复文件占用的磁盘空间。
 
-> 原项目 [goodbest/OfficeThinner](https://github.com/goodbest/OfficeThinner) 只适用于 Office 2016 for Mac（15.x），
-> 在现代 Office（Microsoft 365 / Office LTSC for Mac，16.x）上**会导致应用签名失效、无法启动**。
-> 本版本重写了去重机制，适配当前 Office。
+> **这是非官方重写版，与原项目作者无关。**
+> 思路借鉴自 [goodbest/OfficeThinner](https://github.com/goodbest/OfficeThinner)，
+> 但代码为**完全重写**，未复用其源码；原项目未声明许可证，本项目采用 MIT，两者无版权关联。
+> 项目名 `OfficeThinner` 沿用原项目名称以便对照，仓库名与包标识均为独立。
+>
+> 原项目只适用于 Office 2016 for Mac（15.x），在现代 Office（Microsoft 365 / Office LTSC
+> for Mac，16.x）上**会导致应用签名失效、无法启动**。本版本重写了去重机制，适配当前 Office。
 
 ## 成果速览（本机实测，Office LTSC 16.112.4）
 
@@ -102,6 +106,11 @@ sudo bash remove_mau.sh --remove                   # 执行
 bash clean_office_locks.sh                         # 干跑，只列清单
 bash clean_office_locks.sh --clean                 # 移入废纸篓
 ```
+
+> **⚠️ ② 的前置条件**：它移除 App 包内资源，会让 `codesign --verify --strict` 报
+> `a sealed resource is missing or invalid`。macOS 默认在启动时校验签名，因此该步骤要求
+> **系统已关闭 SIP 与签名强制**（`csrutil status` → `disabled`），否则 Office 会被拒绝启动。
+> ③ 无此要求（原因见上方说明）；①④⑤⑥ 完全不涉及签名。
 
 ### ① OfficeThinner.sh —— 主脚本
 
@@ -353,4 +362,10 @@ python3 analyze_identical.py    # 聚焦 Frameworks / SharedSupport 的剩余可
 
 去重的思路来自 [goodbest/OfficeThinner](https://github.com/goodbest/OfficeThinner)。
 2.0 保留了「多个 Office App 共享同一份资源」的核心理念，把实现从符号链接换成硬链接，
-使其在现代 macOS 与 Office 上继续成立。
+使其在现代 macOS 与 Office 上继续成立。代码为完全重写，未复用原项目源码。
+
+---
+
+## License
+
+[MIT](LICENSE) © 2026 iridiumgit
